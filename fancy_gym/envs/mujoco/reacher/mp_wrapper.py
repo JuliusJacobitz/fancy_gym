@@ -14,7 +14,38 @@ class MPWrapper(RawInterfaceWrapper):
                 'alpha_phase': 2,
             },
         },
-        'ProDMP': {},
+        'ProDMP': {
+            "trajectory_generator_kwargs": {
+                'trajectory_generator_type': 'prodmp',
+                'duration': 2.0,
+                'weights_scale': 0.3,
+                'goal_scale': 0.3,
+                'auto_scale_basis': True,
+                'disable_goal': False,
+                'relative_gaol': True,
+            },
+            "phase_generator_kwargs": {
+                'phase_generator_type': 'exp',
+                'alpha_phase': 3,
+                'tau': 1.5,
+            },
+            "controller_kwargs": {
+                'controller_type': 'motor',
+                "p_gains": 1.0,
+                "d_gains": 0.1,
+            },
+            "basis_generator_kwargs": {
+                'basis_generator_type': 'prodmp',
+                'alpha': 10,
+                'num_basis': 5,
+                'basis_bandwidth_factor': 3,
+            },
+            "black_box_kwargs": {
+            }
+        
+        }
+
+
     }
 
     @property

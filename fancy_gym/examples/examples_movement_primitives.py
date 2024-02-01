@@ -272,7 +272,14 @@ def main():
     # # Custom MP
     # example_fully_custom_mp(seed=10, iterations=1, render=render)
     # example_fully_custom_mp_alternative(seed=10, iterations=1, render=render)
-    example_mp("fancy_ProDMP/AirHockey-7dof-hit-airhockit2023", seed=10, iterations=20, render=render)
+
+
+    #Airhockey
+    # example_mp("fancy_ProDMP/AirHockey-7dof-hit-airhockit2023", seed=42, iterations=1, render=render)
+
+    #Mujoco reacher
+    example_mp("fancy_ProDMP/Reacher7d-v0", seed=42, iterations=2, render=render)
+
 
 
 if __name__ == '__main__':
