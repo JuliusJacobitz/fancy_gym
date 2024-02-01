@@ -39,29 +39,23 @@ class AirhocKIT2023BaseEnv(AirHockeySingle):
         return self.filter_obs(obs)
 
     def step(self, action):
-        action /= 10
-
-        new_vel = self.interp_vel + action
-
-        jerk = 2 * (new_vel - self.interp_vel - self.last_acceleration * 0.02) / (0.02 ** 2)
-        new_pos = self.interp_pos + self.interp_vel * 0.02 + (1 / 2) * self.last_acceleration * (0.02 ** 2) + (
-                    1 / 6) * jerk * (0.02 ** 3)
-        abs_action = np.vstack([np.hstack([new_pos, 0]), np.hstack([new_vel, 0])])
-
-        self.interp_pos = new_pos
-        self.interp_vel = new_vel
-        self.last_acceleration += jerk * 0.02
-
-        obs, rew, done, info = super().step(abs_action)
+        self.interp_pos = action
+        
+        action = np.hstack([action, 0]) # add 0 as last joint is not controlled
+        obs, rew, done, info = super().step(action)
         self.add_noise(obs)
         self.last_planned_world_pos = self._fk(self.interp_pos)
+        # self.interp_vel and self.last_acceleration could be rm, but much overhead (:
         obs = np.hstack([
             obs, self.interp_pos, self.interp_vel, self.last_acceleration, self.last_planned_world_pos
         ])
 
+        # check constraints
         fatal_rew = self.check_fatal(obs)
-        if fatal_rew != 0:
-            return self.filter_obs(obs), fatal_rew, True, info
+        
+        # currently no constraints
+        # if fatal_rew != 0:
+        #     return self.filter_obs(obs), fatal_rew, True, info
 
         return self.filter_obs(obs), rew, done, info
 
@@ -78,12 +72,15 @@ class AirhocKIT2023BaseEnv(AirHockeySingle):
 
         ee_constr = constraint_values["ee_constr"]
         if ee_constr.max() > 0:
+            print("end effector constr")
             fatal_rew += ee_constr.max()
 
         link_constr = constraint_values["link_constr"]
         if link_constr.max() > 0:
             fatal_rew += link_constr.max()
 
+        if fatal_rew == 0:
+            print("no constr")
         return -fatal_rew
 
     def check_fatal(self, obs):
